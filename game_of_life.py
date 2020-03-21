@@ -4,7 +4,6 @@ import itertools
 import time
 import argparse
 
-
 # Constant abstractions for X and Y coordinates
 X, Y = 0, 1
 
