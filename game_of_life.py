@@ -63,6 +63,10 @@ def draw_frame(stdscr, x_range, y_range):
     list(map(lambda p: stdscr.addstr(p[Y], p[X], '#'), frame))
 
 
+def draw_label(stdscr, h, padding_x, padding_y, cur_gen, num_gen):
+    stdscr.addstr(h - padding_y + 2, padding_x, f"generation {cur_gen.zfill(len(num_gen))}/{num_gen}")
+
+
 def main(stdscr, generations, num_start_points, time_delay):
     '''Calculates padding and runs the game of life'''
     curses.curs_set(0)
@@ -77,10 +81,11 @@ def main(stdscr, generations, num_start_points, time_delay):
 
     board = initial_config(dims, num_start_points)
 
-    for i in range(generations):
+    for i in range(generations+1):
         draw_frame(stdscr, (padding_x - 1, w - padding_x + 1),
                    (padding_y - 1, h - padding_y + 1))
         draw_board(stdscr, board, padding_x, padding_y)
+        draw_label(stdscr, h, padding_x, padding_y, str(i), str(generations))
         stdscr.refresh()
         time.sleep(time_delay)
         board = step(board, dims)
