@@ -63,17 +63,19 @@ def draw_frame(stdscr, x_range, y_range):
     list(map(lambda p: stdscr.addstr(p[Y], p[X], '#'), frame))
 
 
-def main(stdscr, generations, dims, num_start_points, time_delay):
+def main(stdscr, generations, num_start_points, time_delay):
     '''Calculates padding and runs the game of life'''
     curses.curs_set(0)
 
-    board = initial_config(dims, num_start_points)
-
     (w, h) = (curses.COLS, curses.LINES)
-    assert (dims[X] + 2 < w and dims[Y] + 2 < h)
 
-    padding_x = int((w - dims[X]) / 2)
-    padding_y = int((h - dims[Y]) / 2)
+    padding_x = 5
+    padding_y = 5
+
+    dims = (w - 2 * padding_x, h - 2 * padding_y)
+    assert (dims[X] * dims[Y] >= args.num_start_points)
+
+    board = initial_config(dims, num_start_points)
 
     for i in range(generations):
         draw_frame(stdscr, (padding_x - 1, w - padding_x + 1),
@@ -87,12 +89,6 @@ def main(stdscr, generations, dims, num_start_points, time_delay):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("play the game of life")
-    parser.add_argument("-d",
-                        "--dim",
-                        nargs=2,
-                        type=int,
-                        default=[100, 30],
-                        help="dimensions of the game of life board")
     parser.add_argument("-n",
                         "--num-start-points",
                         type=int,
@@ -110,7 +106,5 @@ if __name__ == "__main__":
                         help="how many seconds to wait between generations")
     args = parser.parse_args()
 
-    dimensions = args.dim
-    assert (dimensions[X] * dimensions[Y] >= args.num_start_points)
-    curses.wrapper(main, args.generations, dimensions, args.num_start_points,
+    curses.wrapper(main, args.generations, args.num_start_points,
                    args.time_delay)
