@@ -7,6 +7,11 @@ import argparse
 # Constant abstractions for X and Y coordinates
 X, Y = 0, 1
 
+PADDING_X = 5
+PADDING_Y = 5
+
+breakpoint()
+
 
 def get_board_points(dims):
     '''returns all points on a dims.X*dims.Y board'''
@@ -23,7 +28,6 @@ def get_neighbors(p):
     all_neighbors = set(
         map(lambda p_shift: (p[X] + p_shift[X], p[Y] + p_shift[Y]),
             itertools.product([1, 0, -1], repeat=2)))
-
     return all_neighbors - {p}
 
 
@@ -33,6 +37,7 @@ def num_living_neighbors(p, board):
 
 
 def rules(p, board):
+    '''returns True if a point should be alive in next generation'''
     if p in board:
         return True if num_living_neighbors(p, board) in {2, 3} else False
     else:
@@ -45,10 +50,10 @@ def step(board, dims):
     return board
 
 
-def draw_board(stdscr, board, padding_x, padding_y):
+def draw_board(stdscr, board):
     '''draws a board with the map function'''
     list(
-        map(lambda p: stdscr.addstr(padding_y + p[Y], padding_x + p[X], 'O'),
+        map(lambda p: stdscr.addstr(PADDING_Y + p[Y], PADDING_X + p[X], 'O'),
             board))
 
 
@@ -63,8 +68,10 @@ def draw_frame(stdscr, x_range, y_range):
     list(map(lambda p: stdscr.addstr(p[Y], p[X], '#'), frame))
 
 
-def draw_label(stdscr, h, padding_x, padding_y, cur_gen, num_gen):
-    stdscr.addstr(h - padding_y + 2, padding_x, f"generation {cur_gen.zfill(len(num_gen))}/{num_gen}")
+def draw_label(stdscr, h, cur_gen, num_gen):
+    '''draw the generation label for curses display'''
+    stdscr.addstr(h - PADDING_Y + 2, PADDING_X,
+                  f"generation {cur_gen.zfill(len(num_gen))}/{num_gen}")
 
 
 def main(stdscr, generations, num_start_points, time_delay):
@@ -73,19 +80,16 @@ def main(stdscr, generations, num_start_points, time_delay):
 
     (w, h) = (curses.COLS, curses.LINES)
 
-    padding_x = 5
-    padding_y = 5
-
-    dims = (w - 2 * padding_x, h - 2 * padding_y)
+    dims = (w - 2 * PADDING_X, h - 2 * PADDING_Y)
     assert (dims[X] * dims[Y] >= args.num_start_points)
 
     board = initial_config(dims, num_start_points)
 
-    for i in range(generations+1):
-        draw_frame(stdscr, (padding_x - 1, w - padding_x + 1),
-                   (padding_y - 1, h - padding_y + 1))
-        draw_board(stdscr, board, padding_x, padding_y)
-        draw_label(stdscr, h, padding_x, padding_y, str(i), str(generations))
+    for i in range(generations + 1):
+        draw_frame(stdscr, (PADDING_X - 1, w - PADDING_X + 1),
+                   (PADDING_Y - 1, h - PADDING_Y + 1))
+        draw_board(stdscr, board)
+        draw_label(stdscr, h, str(i), str(generations))
         stdscr.refresh()
         time.sleep(time_delay)
         board = step(board, dims)
